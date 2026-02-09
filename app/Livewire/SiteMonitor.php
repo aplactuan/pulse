@@ -2,76 +2,62 @@
 
 namespace App\Livewire;
 
+use App\Models\Site;
 use Livewire\Component;
 
 class SiteMonitor extends Component
 {
+    public string $newName = '';
+
     public string $newUrl = '';
 
     public array $sites = [];
 
     public function mount(): void
     {
-        $this->sites = $this->defaultSites();
+        $this->loadSites();
     }
 
     /**
      * @return array<int, array{id: string, name: string, url: string, status: string, responseTime: int, lastChecked: string, uptime: string}>
      */
-    private function defaultSites(): array
+    private function loadSites(): void
     {
-        return [
-            [
-                'id' => '1',
-                'name' => 'Google',
-                'url' => 'https://google.com',
-                'status' => 'operational',
-                'responseTime' => 228,
-                'lastChecked' => 'less than a minute ago',
-                'uptime' => '99.9%',
-            ],
-            [
-                'id' => '2',
-                'name' => 'GitHub',
-                'url' => 'https://github.com',
-                'status' => 'operational',
-                'responseTime' => 97,
-                'lastChecked' => 'less than a minute ago',
-                'uptime' => '99.8%',
-            ],
-            [
-                'id' => '3',
-                'name' => 'Twitter',
-                'url' => 'https://twitter.com',
-                'status' => 'degraded',
-                'responseTime' => 320,
-                'lastChecked' => 'less than a minute ago',
-                'uptime' => '99.4%',
-            ],
-        ];
+        $this->sites = Site::query()
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Site $site): array => [
+                'id' => (string) $site->id,
+                'name' => $site->name,
+                'url' => $site->url,
+                'status' => $site->status ?? 'operational',
+                'responseTime' => $site->response_time ?? 0,
+                'lastChecked' => '—',
+                'uptime' => '—',
+            ])
+            ->values()
+            ->all();
     }
 
     public function addSite(): void
     {
         $this->validate([
+            'newName' => ['required', 'string', 'max:255'],
             'newUrl' => ['required', 'string', 'url'],
-        ], [], ['newUrl' => __('website URL')]);
+        ], [], [
+            'newName' => __('name'),
+            'newUrl' => __('website URL'),
+        ]);
 
-        $url = parse_url($this->newUrl, PHP_URL_HOST) ?? $this->newUrl;
-        $name = ucfirst(str_replace('.com', '', (string) $url));
-
-        $this->sites[] = [
-            'id' => uniqid('', true),
-            'name' => $name,
+        Site::query()->create([
+            'name' => $this->newName,
             'url' => $this->newUrl,
-            'status' => 'operational',
-            'responseTime' => random_int(80, 400),
-            'lastChecked' => 'less than a minute ago',
-            'uptime' => '99.'.random_int(0, 9).'%',
-        ];
+        ]);
 
+        $this->newName = '';
         $this->newUrl = '';
         $this->resetValidation();
+        $this->loadSites();
     }
 
     public function refreshAll(): void
@@ -84,7 +70,8 @@ class SiteMonitor extends Component
 
     public function removeSite(string $id): void
     {
-        $this->sites = array_values(array_filter($this->sites, fn (array $s) => $s['id'] !== $id));
+        Site::query()->find($id)?->delete();
+        $this->loadSites();
     }
 
     /**

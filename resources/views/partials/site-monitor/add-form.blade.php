@@ -1,10 +1,22 @@
-<div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
     <flux:field class="min-w-0 flex-1">
+        <flux:label>{{ __('Name') }}</flux:label>
+        <flux:input
+            wire:model="newName"
+            wire:keydown.enter="addSite"
+            type="text"
+            :placeholder="__('Website name')"
+            class="w-full"
+        />
+        <flux:error name="newName" />
+    </flux:field>
+    <flux:field class="min-w-0 flex-1">
+        <flux:label>{{ __('URL') }}</flux:label>
         <flux:input
             wire:model="newUrl"
             wire:keydown.enter="addSite"
             type="url"
-            :placeholder="__('Enter website URL (e.g., example.com)')"
+            :placeholder="__('https://example.com')"
             class="w-full"
         />
         <flux:error name="newUrl" />
@@ -16,7 +28,6 @@
         wire:loading.attr="disabled"
         class="bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-600 dark:hover:bg-emerald-500"
     >
-        <flux:icon.plus class="size-4" />
         {{ __('Add Website') }}
     </flux:button>
 </div>

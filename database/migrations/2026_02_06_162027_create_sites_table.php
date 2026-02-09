@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('url');
-            $table->unsignedInteger('response_time');
-            $table->string('status');
+            $table->unsignedInteger('response_time')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }
