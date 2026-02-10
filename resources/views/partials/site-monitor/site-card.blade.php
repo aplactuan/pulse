@@ -2,18 +2,19 @@
 
 @php
     $statusConfig = [
-        'operational' => ['color' => 'green', 'label' => __('Operational'), 'dotClass' => 'bg-emerald-500'],
+        'operational' => ['color' => 'green', 'label' => __('Operational'), 'dotClass' => 'bg-emerald-900'],
         'degraded' => ['color' => 'amber', 'label' => __('Degraded'), 'dotClass' => 'bg-amber-500'],
         'down' => ['color' => 'red', 'label' => __('Down'), 'dotClass' => 'bg-red-500'],
     ];
     $config = $statusConfig[$site['status']] ?? $statusConfig['operational'];
+    $statusLabel = ! empty($site['statusCode']) ? $config['label'] . ' (' . $site['statusCode'] . ')' : $config['label'];
 @endphp
 
 <div class="rounded-xl border border-zinc-700 bg-zinc-800/80 p-4 dark:border-zinc-600">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
-                <flux:heading size="lg">{{ $site['name'] }}</flux:heading>
+                <flux:heading size="lg" class="text-white">{{ $site['name'] }}</flux:heading>
                 <a href="{{ $site['url'] }}" target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-300" aria-label="{{ __('Open in new tab') }}">
                     <flux:icon.arrow-top-right-on-square class="size-4" />
                 </a>
@@ -22,7 +23,9 @@
             <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span class="inline-flex items-center gap-1.5">
                     <span class="size-2 rounded-full {{ $config['dotClass'] }}" aria-hidden="true"></span>
-                    <flux:badge :color="$config['color']" variant="outline" size="sm">{{ $config['label'] }}</flux:badge>
+                    <flux:badge :color="$config['color']" variant="outline" size="sm">
+                        {{ $statusLabel }}
+                    </flux:badge>
                 </span>
                 <span class="inline-flex items-center gap-1 text-sm text-zinc-400">
                     <flux:icon.bolt class="size-4" />
@@ -36,13 +39,17 @@
         </div>
         <div class="flex items-center gap-4 sm:flex-col sm:items-end">
             <flux:button
-                variant="ghost"
-                icon="trash"
-                wire:click='removeSite({{ \Illuminate\Support\Js::from($site['id']) }})'
+                :wire:click="'removeSite(' . \Illuminate\Support\Js::from($site['id']) . ')'"
                 wire:confirm="{{ __('Are you sure you want to remove this site from monitoring?') }}"
                 class="text-zinc-400 hover:text-red-400"
                 aria-label="{{ __('Remove site') }}"
-            />
+                variant="subtle"
+            >
+                <span class="text-zinc-400 hover:text-red-400">
+                    <flux:icon.trash class="size-4" />
+                </span>
+                
+            </flux:button>
             <div class="text-end">
                 <flux:text variant="subtle" class="text-xs">{{ __('Uptime') }}</flux:text>
                 <flux:heading size="sm" class="text-emerald-400">{{ $site['uptime'] }}</flux:heading>

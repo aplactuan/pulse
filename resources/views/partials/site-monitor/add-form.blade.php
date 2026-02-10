@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
     <flux:field class="min-w-0 flex-1">
-        <flux:label>{{ __('Name') }}</flux:label>
+        <flux:label class="text-emerald-400">{{ __('Name') }}</flux:label>
         <flux:input
             wire:model="newName"
             wire:keydown.enter="addSite"
@@ -11,7 +11,7 @@
         <flux:error name="newName" />
     </flux:field>
     <flux:field class="min-w-0 flex-1">
-        <flux:label>{{ __('URL') }}</flux:label>
+        <flux:label class="text-emerald-400">{{ __('URL') }}</flux:label>
         <flux:input
             wire:model="newUrl"
             wire:keydown.enter="addSite"

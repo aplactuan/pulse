@@ -3,7 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Site;
+use Illuminate\Support\Facades\Http;
 use Livewire\Component;
+use Throwable;
 
 class SiteMonitor extends Component
 {
@@ -19,7 +21,7 @@ class SiteMonitor extends Component
     }
 
     /**
-     * @return array<int, array{id: string, name: string, url: string, status: string, responseTime: int, lastChecked: string, uptime: string}>
+     * @return array<int, array{id: string, name: string, url: string, status: string, statusCode: int|null, responseTime: int, lastChecked: string, uptime: string}>
      */
     private function loadSites(): void
     {
@@ -31,8 +33,9 @@ class SiteMonitor extends Component
                 'name' => $site->name,
                 'url' => $site->url,
                 'status' => $site->status ?? 'operational',
+                'statusCode' => $site->status_code,
                 'responseTime' => $site->response_time ?? 0,
-                'lastChecked' => '—',
+                'lastChecked' => $site->last_checked_at?->diffForHumans() ?? '—',
                 'uptime' => '—',
             ])
             ->values()
@@ -62,10 +65,55 @@ class SiteMonitor extends Component
 
     public function refreshAll(): void
     {
-        foreach ($this->sites as $i => $site) {
-            $this->sites[$i]['responseTime'] = random_int(60, 350);
-            $this->sites[$i]['lastChecked'] = 'less than a minute ago';
+        $sites = Site::query()->get();
+
+        foreach ($sites as $site) {
+            $start = hrtime(true);
+
+            try {
+                $response = Http::connectTimeout(5)
+                    ->timeout(10)
+                    ->withHeaders([
+                        'User-Agent' => 'Pulse Site Monitor',
+                        'Accept' => '*/*',
+                    ])
+                    ->get($site->url);
+
+                $elapsedMs = (int) round((hrtime(true) - $start) / 1_000_000);
+                $statusCode = $response->status();
+
+                $site->forceFill([
+                    'status_code' => $statusCode,
+                    'response_time' => max(0, $elapsedMs),
+                    'status' => $this->statusFromStatusCode($statusCode),
+                    'last_checked_at' => now(),
+                ])->save();
+            } catch (Throwable) {
+                $elapsedMs = (int) round((hrtime(true) - $start) / 1_000_000);
+
+                $site->forceFill([
+                    'status_code' => null,
+                    'response_time' => max(0, $elapsedMs),
+                    'status' => 'down',
+                    'last_checked_at' => now(),
+                ])->save();
+            }
         }
+
+        $this->loadSites();
+    }
+
+    private function statusFromStatusCode(int $statusCode): string
+    {
+        if ($statusCode < 400) {
+            return 'operational';
+        }
+
+        if ($statusCode < 500) {
+            return 'degraded';
+        }
+
+        return 'down';
     }
 
     public function removeSite(string $id): void

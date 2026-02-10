@@ -1,4 +1,4 @@
-<div class="flex h-full w-full flex-1 flex-col gap-6 p-4 md:p-6">
+<div class="flex h-full w-full flex-1 flex-col gap-6 p-4 md:p-6" wire:poll.300s="refreshAll">
     @include('partials.site-monitor.header')
 
     @include('partials.site-monitor.stats', ['stats' => $this->stats])

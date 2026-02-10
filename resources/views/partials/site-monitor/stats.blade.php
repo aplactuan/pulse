@@ -6,7 +6,7 @@
             <flux:icon.chart-bar class="size-4" />
             <span class="text-xs font-medium uppercase tracking-wider">{{ __('Total Sites') }}</span>
         </div>
-        <flux:heading size="lg" class="mt-1">{{ $stats['total'] }}</flux:heading>
+        <flux:heading size="lg" class="mt-1 text-white">{{ $stats['total'] }}</flux:heading>
     </div>
     <div class="rounded-xl border border-emerald-500/50 bg-zinc-800/80 px-4 py-3 dark:border-emerald-500/30">
         <div class="flex items-center gap-2 text-zinc-400">
@@ -34,6 +34,6 @@
             <flux:icon.bolt class="size-4" />
             <span class="text-xs font-medium uppercase tracking-wider">{{ __('Avg Response') }}</span>
         </div>
-        <flux:heading size="lg" class="mt-1">{{ $stats['avgResponse'] }}ms</flux:heading>
+        <flux:heading size="lg" class="mt-1 text-white">{{ $stats['avgResponse'] }}ms</flux:heading>
     </div>
 </div>

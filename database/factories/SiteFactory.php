@@ -16,11 +16,20 @@ class SiteFactory extends Factory
      */
     public function definition(): array
     {
+        $status = fake()->randomElement(['operational', 'degraded', 'down']);
+        $statusCode = match ($status) {
+            'operational' => 200,
+            'degraded' => 429,
+            'down' => 503,
+        };
+
         return [
             'name' => fake()->words(2, true),
             'url' => fake()->url(),
             'response_time' => fake()->numberBetween(50, 2000),
-            'status' => fake()->randomElement(['up', 'down', 'unknown']),
+            'status' => $status,
+            'status_code' => $statusCode,
+            'last_checked_at' => now()->subMinutes(fake()->numberBetween(1, 120)),
         ];
     }
 }

@@ -18,8 +18,10 @@ class Site extends Model
     protected $fillable = [
         'name',
         'url',
+        'status_code',
         'response_time',
         'status',
+        'last_checked_at',
     ];
 
     /**
@@ -31,6 +33,8 @@ class Site extends Model
     {
         return [
             'response_time' => 'integer',
+            'status_code' => 'integer',
+            'last_checked_at' => 'datetime',
         ];
     }
 }

@@ -7,12 +7,12 @@
             </svg>
         </div>
         <div>
-            <flux:heading size="xl">{{ __('Site Monitor') }}</flux:heading>
+            <flux:heading size="xl" class="text-white">{{ __('Site Monitor') }}</flux:heading>
             <flux:subheading class="text-zinc-400">{{ __('Real-time website monitoring') }}</flux:subheading>
         </div>
     </div>
     <flux:button
-        variant="ghost"
+        variant="primary"
         icon="arrow-path"
         wire:click="refreshAll"
         wire:loading.attr="disabled"
