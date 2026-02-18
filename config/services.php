@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'pagespeed_insights' => [
+        'key' => env('PAGESPEED_INSIGHTS_API_KEY'),
+        'base_url' => env('PAGESPEED_INSIGHTS_BASE_URL', 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'),
+        'timeout' => env('PAGESPEED_INSIGHTS_TIMEOUT', 30),
+        'connect_timeout' => env('PAGESPEED_INSIGHTS_CONNECT_TIMEOUT', 10),
+    ],
+
 ];

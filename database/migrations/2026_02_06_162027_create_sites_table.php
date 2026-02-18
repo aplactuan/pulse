@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('url');
             $table->unsignedInteger('response_time')->nullable();
+            $table->unsignedInteger('pagespeed_score')->nullable();
             $table->string('status')->nullable();
+            $table->unsignedSmallInteger('status_code')->nullable();
+            $table->timestamp('last_checked_at')->nullable();
             $table->timestamps();
         });
     }
