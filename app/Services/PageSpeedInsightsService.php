@@ -8,6 +8,14 @@ use RuntimeException;
 
 class PageSpeedInsightsService
 {
+    public function __construct(
+        private readonly string $baseUrl,
+        private readonly string $key,
+        private readonly int $connectTimeout,
+        private readonly int $timeout,
+        private readonly bool $verify = true,
+    ) {}
+
     /**
      * @return array{url: string, strategy: string, score: int, metrics: array{fcpMs: int|null, lcpMs: int|null, cls: float|null, tbtMs: int|null, speedIndexMs: int|null}}
      *
@@ -15,24 +23,22 @@ class PageSpeedInsightsService
      */
     public function fetchPerformance(string $url, string $strategy = 'mobile'): array
     {
-        $baseUrl = (string) config('services.pagespeed_insights.base_url', 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed');
-        $key = config('services.pagespeed_insights.key');
-
         $query = [
             'url' => $url,
             'strategy' => $strategy,
             'category' => 'performance',
+            'key' => $this->key,
         ];
 
-        if (filled($key)) {
-            $query['key'] = (string) $key;
+        $request = Http::connectTimeout((int) $this->connectTimeout)
+            ->timeout((int) $this->timeout)
+            ->acceptJson();
+
+        if (! $this->verify) {
+            $request = $request->withOptions(['verify' => false]);
         }
 
-        $response = Http::connectTimeout((int) config('services.pagespeed_insights.connect_timeout', 10))
-            ->timeout((int) config('services.pagespeed_insights.timeout', 30))
-            ->acceptJson()
-            ->get($baseUrl, $query)
-            ->throw();
+        $response = $request->get($this->baseUrl, $query)->throw();
 
         $payload = $response->json();
 

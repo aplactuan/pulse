@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Site;
+use App\Services\PageSpeedInsightsService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 
 class PageSpeedAnalysisCommand extends Command
 {
@@ -23,8 +26,19 @@ class PageSpeedAnalysisCommand extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(PageSpeedInsightsService $pageSpeedInsightsService): int
     {
-        //
+        // get all sites from the database but chunk them by 100
+        Site::query()->chunk(100, function (Collection $sites) use ($pageSpeedInsightsService) {
+            foreach ($sites as $site) {
+                $performance = $pageSpeedInsightsService->fetchPerformance($site->url, 'desktop');
+                $this->info('Performance: '.$performance['score']);
+                $site->update([
+                    'pagespeed_score' => $performance['score'],
+                ]);
+            }
+        });
+
+        return Command::SUCCESS;
     }
 }
