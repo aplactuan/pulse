@@ -31,10 +31,13 @@ class PageSpeedAnalysisCommand extends Command
         // get all sites from the database but chunk them by 100
         Site::query()->chunk(100, function (Collection $sites) use ($pageSpeedInsightsService) {
             foreach ($sites as $site) {
-                $performance = $pageSpeedInsightsService->fetchPerformance($site->url, 'desktop');
-                $this->info('Performance: '.$performance['score']);
+                $desktopPerformance = $pageSpeedInsightsService->fetchPerformance($site->url, 'desktop');
+                $mobilePerformance = $pageSpeedInsightsService->fetchPerformance($site->url, 'mobile');
+                $this->info('Performance: '.$desktopPerformance['score']);
+                $this->info('Performance: '.$mobilePerformance['score']);
                 $site->update([
-                    'pagespeed_score' => $performance['score'],
+                    'pagespeed_desktop_score' => $desktopPerformance['score'],
+                    'pagespeed_mobile_score' => $mobilePerformance['score'],
                 ]);
             }
         });

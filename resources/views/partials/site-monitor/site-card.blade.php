@@ -54,6 +54,31 @@
                 <flux:text variant="subtle" class="text-xs">{{ __('Uptime') }}</flux:text>
                 <flux:heading size="sm" class="text-emerald-400">{{ $site['uptime'] }}</flux:heading>
             </div>
+            @php
+                $scoreColor = fn (?int $score): string => match (true) {
+                    $score === null => 'text-zinc-500',
+                    $score < 60 => 'text-red-400',
+                    $score < 85 => 'text-amber-400',
+                    default => 'text-emerald-400',
+                };
+            @endphp
+            <div class="text-end">
+                <flux:text variant="subtle" class="text-xs">{{ __('Pagespeed') }}</flux:text>
+                <div class="mt-0.5 inline-flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="text-zinc-400">{{ __('Mobile') }}</span>
+                        <span class="font-semibold {{ $scoreColor($site['pagespeedMobileScore'] ?? null) }}">
+                            {{ ($site['pagespeedMobileScore'] ?? null) !== null ? $site['pagespeedMobileScore'] : '—' }}
+                        </span>
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="text-zinc-400">{{ __('Desktop') }}</span>
+                        <span class="font-semibold {{ $scoreColor($site['pagespeedDesktopScore'] ?? null) }}">
+                            {{ ($site['pagespeedDesktopScore'] ?? null) !== null ? $site['pagespeedDesktopScore'] : '—' }}
+                        </span>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </div>

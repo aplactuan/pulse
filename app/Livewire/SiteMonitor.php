@@ -21,7 +21,7 @@ class SiteMonitor extends Component
     }
 
     /**
-     * @return array<int, array{id: string, name: string, url: string, status: string, statusCode: int|null, responseTime: int, lastChecked: string, uptime: string}>
+     * @return array<int, array{id: string, name: string, url: string, status: string, statusCode: int|null, responseTime: int, lastChecked: string, uptime: string, pagespeedDesktopScore: int|null, pagespeedMobileScore: int|null}>
      */
     private function loadSites(): void
     {
@@ -37,6 +37,8 @@ class SiteMonitor extends Component
                 'responseTime' => $site->response_time ?? 0,
                 'lastChecked' => $site->last_checked_at?->diffForHumans() ?? '—',
                 'uptime' => '—',
+                'pagespeedDesktopScore' => $site->pagespeed_desktop_score,
+                'pagespeedMobileScore' => $site->pagespeed_mobile_score,
             ])
             ->values()
             ->all();

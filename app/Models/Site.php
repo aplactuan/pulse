@@ -20,6 +20,8 @@ class Site extends Model
         'url',
         'status_code',
         'response_time',
+        'pagespeed_desktop_score',
+        'pagespeed_mobile_score',
         'status',
         'last_checked_at',
     ];
