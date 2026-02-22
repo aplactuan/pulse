@@ -1,15 +1,5 @@
 @props(['site'])
 
-@php
-    $statusConfig = [
-        'operational' => ['color' => 'green', 'label' => __('Operational'), 'dotClass' => 'bg-emerald-900'],
-        'degraded' => ['color' => 'amber', 'label' => __('Degraded'), 'dotClass' => 'bg-amber-500'],
-        'down' => ['color' => 'red', 'label' => __('Down'), 'dotClass' => 'bg-red-500'],
-    ];
-    $config = $statusConfig[$site['status']] ?? $statusConfig['operational'];
-    $statusLabel = ! empty($site['statusCode']) ? $config['label'] . ' (' . $site['statusCode'] . ')' : $config['label'];
-@endphp
-
 <div class="rounded-xl border border-zinc-700 bg-zinc-800/80 p-4 dark:border-zinc-600">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0 flex-1">
@@ -22,9 +12,12 @@
             <flux:text variant="subtle" class="mt-0.5 truncate text-sm">{{ $site['url'] }}</flux:text>
             <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span class="inline-flex items-center gap-1.5">
-                    <span class="size-2 rounded-full {{ $config['dotClass'] }}" aria-hidden="true"></span>
-                    <flux:badge :color="$config['color']" variant="outline" size="sm">
-                        {{ $statusLabel }}
+                    <span
+                        class="size-2 rounded-full {{ match ($site['status'] ?? 'operational') { 'degraded' => 'bg-amber-500', 'down' => 'bg-red-500', default => 'bg-emerald-900' } }}"
+                        aria-hidden="true"
+                    ></span>
+                    <flux:badge :color="match ($site['status'] ?? 'operational') { 'degraded' => 'amber', 'down' => 'red', default => 'green' }" variant="outline" size="sm">
+                        {{ match ($site['status'] ?? 'operational') { 'degraded' => __('Degraded'), 'down' => __('Down'), default => __('Operational') } }}{{ ! empty($site['statusCode']) ? ' (' . $site['statusCode'] . ')' : '' }}
                     </flux:badge>
                 </span>
                 <span class="inline-flex items-center gap-1 text-sm text-zinc-400">
@@ -54,26 +47,18 @@
                 <flux:text variant="subtle" class="text-xs">{{ __('Uptime') }}</flux:text>
                 <flux:heading size="sm" class="text-emerald-400">{{ $site['uptime'] }}</flux:heading>
             </div>
-            @php
-                $scoreColor = fn (?int $score): string => match (true) {
-                    $score === null => 'text-zinc-500',
-                    $score < 60 => 'text-red-400',
-                    $score < 85 => 'text-amber-400',
-                    default => 'text-emerald-400',
-                };
-            @endphp
             <div class="text-end">
                 <flux:text variant="subtle" class="text-xs">{{ __('Pagespeed') }}</flux:text>
                 <div class="mt-0.5 inline-flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-sm">
                     <span class="inline-flex items-center gap-1.5">
                         <span class="text-zinc-400">{{ __('Mobile') }}</span>
-                        <span class="font-semibold {{ $scoreColor($site['pagespeedMobileScore'] ?? null) }}">
+                        <span class="font-semibold {{ match (true) { ($site['pagespeedMobileScore'] ?? null) === null => 'text-zinc-500', ($site['pagespeedMobileScore'] ?? null) < 60 => 'text-red-400', ($site['pagespeedMobileScore'] ?? null) < 85 => 'text-amber-400', default => 'text-emerald-400' } }}">
                             {{ ($site['pagespeedMobileScore'] ?? null) !== null ? $site['pagespeedMobileScore'] : '—' }}
                         </span>
                     </span>
                     <span class="inline-flex items-center gap-1.5">
                         <span class="text-zinc-400">{{ __('Desktop') }}</span>
-                        <span class="font-semibold {{ $scoreColor($site['pagespeedDesktopScore'] ?? null) }}">
+                        <span class="font-semibold {{ match (true) { ($site['pagespeedDesktopScore'] ?? null) === null => 'text-zinc-500', ($site['pagespeedDesktopScore'] ?? null) < 60 => 'text-red-400', ($site['pagespeedDesktopScore'] ?? null) < 85 => 'text-amber-400', default => 'text-emerald-400' } }}">
                             {{ ($site['pagespeedDesktopScore'] ?? null) !== null ? $site['pagespeedDesktopScore'] : '—' }}
                         </span>
                     </span>
